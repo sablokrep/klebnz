@@ -200,6 +200,7 @@ name = "klebnz"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "csv",
  "figlet-rs",
  "ndarray 0.17.2",
  "ndarray-csv",

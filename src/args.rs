@@ -17,7 +17,7 @@ pub struct CommandParse {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// estimation sheet
+    /// classify according to the logistic and decision classifier
     Klebseq {
         /// path to the file
         filepath: String,
@@ -26,6 +26,7 @@ pub enum Commands {
         /// threads for the analysis
         thread: String,
     },
+    /// classify according to the Random forest
     RandomSeq {
         /// path to the file
         pathfileinput: String,
@@ -39,5 +40,14 @@ pub enum Commands {
         depth: String,
         // samplesplit
         samplesplitinput: String,
+    },
+    /// classify according to the KNN classifier
+    KNNClassify {
+        /// path to the file
+        pathfileinput: String,
+        /// predict file
+        predictfileinput: String,
+        /// number of threads
+        threads: String,
     },
 }

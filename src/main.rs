@@ -13,6 +13,8 @@ use smartcore::ensemble::random_forest_classifier::RandomForestClassifier;
 use smartcore::linalg::basic::matrix::DenseMatrix;
 use smartcore::linear::logistic_regression::LogisticRegression;
 use smartcore::metrics::accuracy;
+mod knn;
+use crate::knn::knnclassifier;
 use smartcore::tree::decision_tree_classifier::DecisionTreeClassifier;
 
 /*
@@ -92,6 +94,21 @@ fn main() {
                 .unwrap();
                 println!("The file has been done: {}", method);
                 println!("The method has been complete: {}", unwrapaggressive);
+            });
+        }
+        Commands::KNNClassify {
+            pathfileinput,
+            predictfileinput,
+            threads,
+        } => {
+            let n_threads = threads.parse::<usize>().expect("thread must be a number");
+            let pool = rayon::ThreadPoolBuilder::new()
+                .num_threads(n_threads)
+                .build()
+                .expect("threads not found");
+            pool.install(|| {
+                let command = knnclassifier(pathfileinput, predictfileinput).unwrap();
+                println!("The knn classifer has finished, {}", command);
             });
         }
     }

@@ -1,5 +1,6 @@
 use crate::klennz::load_data;
 use crate::klennz::predict;
+use smartcore::api::SupervisedEstimator;
 use smartcore::ensemble::random_forest_classifier::RandomForestClassifierParameters;
 use smartcore::ensemble::random_forest_classifier::{
     RandomForestClassifier, RandomForestClassifierSearchParameters,
@@ -35,10 +36,10 @@ pub fn trainradom_agrresive(pathfile: &str, loadfile: &str) -> Result<String, Bo
     let mut best_params = Default::default();
     for params in search_params {
         let cv_result = cross_validate(
-            RandomForestClassifier::fit,
+            RandomForestClassifier::new(),
             &loaddata.0,
             &loaddata.1,
-            best_params,
+            Default::default(),
             &KFold::default().with_n_splits(5),
             &accuracy,
         )
@@ -52,6 +53,11 @@ pub fn trainradom_agrresive(pathfile: &str, loadfile: &str) -> Result<String, Bo
     // Train the final model with the best parameters
     let best_rf = RandomForestClassifier::fit(&loaddata.0, &loaddata.1, best_params).unwrap();
     let modelpredict = best_rf.predict(&predictmatrix).unwrap();
+    let mut filewrite = File::create("predictvalue.txt").expect("file not present");
+    for i in modelpredict.iter() {
+        writeln!(filewrite, "{}", i).expect("file not present");
+    }
+
     Ok("model has been trained".to_string())
 }
 

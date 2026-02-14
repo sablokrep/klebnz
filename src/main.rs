@@ -1,18 +1,27 @@
 mod args;
+mod datstruct;
+mod expr;
 mod klennz;
+mod kmerreg;
+mod predict;
 mod randomextra;
+mod sequence;
 use crate::args::CommandParse;
 use crate::args::Commands;
 use crate::klennz::load_data;
 use crate::klennz::predict;
+use crate::predict::predictmatrix;
 use crate::randomextra::randomextra;
 use crate::randomextra::trainradom_agrresive;
+use crate::sequence::addmatrix;
 use clap::Parser;
 use figlet_rs::FIGfont;
 use smartcore::ensemble::random_forest_classifier::RandomForestClassifier;
 use smartcore::linalg::basic::matrix::DenseMatrix;
 use smartcore::linear::logistic_regression::LogisticRegression;
 use smartcore::metrics::accuracy;
+use std::fs::File;
+use std::io::Write;
 mod knn;
 use crate::knn::knnclassifier;
 use smartcore::tree::decision_tree_classifier::DecisionTreeClassifier;
@@ -109,6 +118,37 @@ fn main() {
             pool.install(|| {
                 let command = knnclassifier(pathfileinput, predictfileinput).unwrap();
                 println!("The knn classifer has finished, {}", command);
+            });
+        }
+        Commands::Expressionseq {
+            fastafile,
+            expressionfile,
+            threshold,
+            windowsize,
+            threads,
+            predictfile,
+        } => {
+            let n_threads = threads.parse::<usize>().expect("thread must be a number");
+            let pool = rayon::ThreadPoolBuilder::new()
+                .num_threads(n_threads)
+                .build()
+                .expect("threads not found");
+            pool.install(|| {
+                let expressionseq =
+                    addmatrix(fastafile, expressionfile, windowsize, threshold).unwrap();
+                let classify = LogisticRegression::fit(
+                    &expressionseq[0].0,
+                    &expressionseq[0].1,
+                    Default::default(),
+                )
+                .unwrap();
+                let predictionfile =
+                    predictmatrix(predictfile, expressionfile, windowsize).unwrap();
+                let predictionvector = classify.predict(&predictionfile).unwrap();
+                let mut filewrite = File::create("predictionvalues.txt").expect("file not present");
+                for i in predictionvector.iter() {
+                    writeln!(filewrite, "{}", i).expect("line not present");
+                }
             });
         }
     }

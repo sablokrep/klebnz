@@ -50,4 +50,19 @@ pub enum Commands {
         /// number of threads
         threads: String,
     },
+    /// sequence to expression regressor
+    Expressionseq {
+        /// path to the fasta file
+        fastafile: String,
+        /// path to the expression file
+        expressionfile: String,
+        /// threshold for the expression
+        threshold: String,
+        /// windowsize
+        windowsize: String,
+        /// threads for the analysis
+        threads: String,
+        /// predict file
+        predictfile: String,
+    },
 }
